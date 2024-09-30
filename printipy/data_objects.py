@@ -1083,11 +1083,9 @@ class UpdateWebhook:
 
 	Args:
 	    url: External webhook URL
-	    topic: type of event to push data to
 	"""
 
 	url: Optional[str] = field(default=None, metadata=config(exclude=_exclude_if_none))
-	topic: Optional[str] = field(default=None, metadata=config(exclude=_exclude_if_none))
 
 
 @dataclass_json
