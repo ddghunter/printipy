@@ -1075,11 +1075,13 @@ class CreateWebhook:
 	topic: str
 
 
+
 @dataclass_json
 @dataclass
 class UpdateWebhook:
 	"""
 	Options to update a webhook. All fields are optional. Stores and validate data between Python and Printify.
+ 	*Note* - The `topic` field of a webhook cannot be changed. A new webhook must be created &/or the old one deleted.
 
 	Args:
 	    url: External webhook URL
