@@ -14,6 +14,7 @@ from printipy.data_objects import (
 	PrintProvider,
 	PrintProviderVariants,
 	ShippingInfo,
+	ShippingProfile,
 	ShippingCost,
 	CreateShippingEstimate,
 	Product,
@@ -38,6 +39,7 @@ from printipy.exceptions import (
 	InvalidRequestException,
 	PrintifyException,
 )
+from printipy.utils import convert_shipping_info_v2_data
 
 
 class _ApiHandlingMixin:
@@ -287,7 +289,7 @@ class PrintiPyCatalog(_ApiHandlingMixin):
 		self, blueprint_id: Union[str, int], print_provider_id: Union[str, int]
 	) -> ShippingInfo:
 		"""
-		Pulls a shipping information a given blueprint and print provider from Printify.
+		Pulls v1 shipping information for a given blueprint and print provider from Printify.
 
 		Examples:
 		    >>> from printipy.api import PrintiPy
@@ -312,6 +314,43 @@ class PrintiPyCatalog(_ApiHandlingMixin):
 		)
 		shipping_information = self._get(shipping_url)
 		return self._parse(ShippingInfo, shipping_information)
+
+	def get_shipping_info_v2(
+		self, blueprint_id: Union[str, int], print_provider_id: Union[str, int]
+	) -> List[ShippingProfile]:
+		"""
+		Pulls v2 shipping information for a given blueprint and print provider from Printify.
+
+		Examples:
+		    >>> from printipy.api import PrintiPy
+		    >>> api = PrintiPy(api_token='...')
+		    >>> blueprint = api.catalog.get_blueprint('...')
+		    >>> print_providers = api.catalog.get_print_providers_for_blueprint(blueprint.id)
+		    >>> shipping_info = api.catalog.get_shipping_info_v2(blueprint.id, print_providers[0].id)
+
+		Returns:
+		    Shipping information `List[printipy.data_objects.ShippingProfile]` object
+
+		Raises:
+		    ParseException: If unable to parse Printify's response
+		    InvalidScopeException: If the API keys isn't permitted to perform this operation
+		    InvalidRequestException: If the Blueprint ID or Print Provider ID does not exist in Printify
+		    PrintifyException: If Printify returned an error - usually contains information regarding malformed input
+		"""
+		# GET / v2 / catalog / blueprints / {blueprint_id} / print_providers / {print_provider_id} / shipping.json
+		shipping_url: str = (
+			f'{self.api_url}/v2/catalog/blueprints/{blueprint_id}/'
+			f'print_providers/{print_provider_id}/shipping.json'
+		)
+		shipping_information: Dict[str, str] = self._get(shipping_url).get("links", {})
+		shipping_profiles: List[Dict[str, Any]] = []
+		for url in shipping_information.values():
+			shipping_data: List[Dict[str, Any]] = self._get(url).get("data", [])
+			shipping_profiles.extend([
+				convert_shipping_info_v2_data(p["attributes"])
+				for p in shipping_data
+			])
+		return self._parse(ShippingProfile, shipping_profiles)
 
 	def get_print_providers(self) -> List[PrintProvider]:
 		"""
