@@ -267,6 +267,78 @@ class ShippingInfo:
 
 	handling_time: ShippingInfoHandlingTime
 	profiles: List[ShippingInfoProfile]
+ 
+ 
+@dataclass_json
+@dataclass
+class ShippingProfileItemCost:
+	"""
+	Object representing the shipping cost for an item from a print provider.
+	Stores and validate data between Python and Printify.
+
+	Args:
+	    cost: shipping cost in whole values. E.g., $12.98 would be 1298
+	    currency: currency of the shipping cost, e.g., USD
+	"""
+
+	amount: int
+	currency: str
+ 
+ 
+@dataclass_json
+@dataclass
+class ShippingProfileCost:
+	"""
+	Object representing the shipping cost for an item from a print provider.
+	Used in v2 of the Printify API.
+	Stores and validate data between Python and Printify.
+
+	Args:
+	    first_item: cost to ship the first item
+	    additional_items: cost to ship any additional items to the first item
+	"""
+
+	first_item: ShippingProfileItemCost
+	additional_items: ShippingProfileItemCost
+ 
+ 
+@dataclass_json
+@dataclass
+class ShippingProfileHandlingTime:
+    """
+    Object representing the handling time for a given shipping option from a print provider.
+    Used in v2 of the Printify API.
+    Stores and validate data between Python and Printify.
+    
+    Args:
+		min: minimum number of days to ship
+		max: maximum number of days to ship
+	"""
+    min: int
+    max: int
+    
+ 
+@dataclass_json
+@dataclass
+class ShippingProfile:
+	"""
+	Object representing the shipping profile a group of items to a given set of countries from a print provider.
+	Used in v2 of the Printify API in lieu of `ShippingInfo` & `ShippingInfoProfile`.
+ 	Stores and validate data between Python and Printify.
+
+	Args:
+	    variant_ids: A list of variants of a given product
+	    first_item: cost to ship the first item
+	    additional_items: cost to ship any additional items to the first item
+	    countries: a list of country codes this shipping profile applies to
+	"""
+
+	shipping_type: str
+	country: Dict[str, str]
+	variant_id: int
+	shipping_plan_id: str
+	handling_time: ShippingProfileHandlingTime
+	shipping_cost: ShippingProfileCost
 
 
 @dataclass_json
