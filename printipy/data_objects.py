@@ -1073,6 +1073,7 @@ class CreateWebhook:
 
 	url: str
 	topic: str
+	secret: Optional[str] = field(default=None, metadata=config(exclude=_exclude_if_none))
 
 
 
